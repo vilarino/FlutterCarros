@@ -1,5 +1,7 @@
 import 'package:carros/api/carro_api.dart';
 import 'package:carros/models/carro.dart';
+import 'package:carros/pages/carro_page.dart';
+import 'package:carros/utils/nav.dart';
 import 'package:flutter/material.dart';
 
 class CarrosListView extends StatefulWidget {
@@ -11,45 +13,40 @@ class CarrosListView extends StatefulWidget {
   CarrosListView({this.tipo});
 }
 
-class _CarrosListViewState extends State<CarrosListView> with AutomaticKeepAliveClientMixin<CarrosListView> {
+class _CarrosListViewState extends State<CarrosListView>
+    with AutomaticKeepAliveClientMixin<CarrosListView> {
+  List<Carro> carros;
 
   @override
   // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
 
   @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    return _body();
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    _loadData();
   }
 
-  _body() {
-    Future<List<Carro>> future = CarroApi.getCarros(widget.tipo);
-    return FutureBuilder(
-      future: future,
-      builder: (context, snapshot) {
-        if(snapshot.hasError){
+  void _loadData() async {
+    List<Carro> carros = await CarroApi.getCarros(widget.tipo);
+    setState(() {
+      this.carros = carros;
+    });
+  }
 
-          return Center(
-            child: Text(
-              "Não foi possível buscar os carros",
-              style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 20
-              ),
-            ),
-          );
-        }
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
 
-        if(!snapshot.hasData){
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-        List<Carro> carros = snapshot.data;
-        return _listView(carros);
-      },
-    );
+    if (carros == null) {
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    return _listView(carros);
   }
 
   Container _listView(List<Carro> carros) {
@@ -69,7 +66,8 @@ class _CarrosListViewState extends State<CarrosListView> with AutomaticKeepAlive
                   children: <Widget>[
                     Center(
                       child: Image.network(
-                        carro.urlFoto ?? "https://www.generationsforpeace.org/wp-content/uploads/2018/03/empty.jpg",
+                        carro.urlFoto ??
+                            "https://www.generationsforpeace.org/wp-content/uploads/2018/03/empty.jpg",
                         width: 250,
                       ),
                     ),
@@ -89,7 +87,7 @@ class _CarrosListViewState extends State<CarrosListView> with AutomaticKeepAlive
                         children: <Widget>[
                           FlatButton(
                             child: const Icon(Icons.zoom_in),
-                            onPressed: () {},
+                            onPressed: () => _onClickCarros(carro),
                           ),
                           FlatButton(
                             child: Icon(Icons.share),
@@ -104,5 +102,9 @@ class _CarrosListViewState extends State<CarrosListView> with AutomaticKeepAlive
             );
           }),
     );
+  }
+
+  _onClickCarros(Carro carro) {
+    push(context, CarroPage(carro));
   }
 }
