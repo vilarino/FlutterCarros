@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:carros/api/carro_api.dart';
 import 'package:carros/models/carro.dart';
 import 'package:carros/pages/carro_page.dart';
@@ -16,37 +18,51 @@ class CarrosListView extends StatefulWidget {
 class _CarrosListViewState extends State<CarrosListView>
     with AutomaticKeepAliveClientMixin<CarrosListView> {
   List<Carro> carros;
+  final _streamController = StreamController<List<Carro>>();
 
   @override
   // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
 
   @override
+  @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-
-    _loadData();
+    _loadCarros();
   }
 
-  void _loadData() async {
+
+  _loadCarros() async {
     List<Carro> carros = await CarroApi.getCarros(widget.tipo);
-    setState(() {
-      this.carros = carros;
-    });
+
+    _streamController.add(carros);
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
 
-    if (carros == null) {
-      return Center(
-        child: CircularProgressIndicator(),
-      );
-    }
+    return StreamBuilder(
+      stream: _streamController.stream,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              "Não foi possível buscar os carros",
+              style: TextStyle(color: Colors.red, fontSize: 20),
+            ),
+          );
+        }
 
-    return _listView(carros);
+        if (!snapshot.hasData) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        List<Carro> carros = snapshot.data;
+        return _listView(carros);
+      },
+    );
   }
 
   Container _listView(List<Carro> carros) {
