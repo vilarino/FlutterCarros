@@ -123,4 +123,11 @@ class _CarrosListViewState extends State<CarrosListView>
   _onClickCarros(Carro carro) {
     push(context, CarroPage(carro));
   }
+
+  @override
+  void dispose(){
+    super.dispose();
+
+    _streamController.close();
+  }
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:carros/api/response_api.dart';
 import 'package:carros/api/login_api.dart';
 import 'package:carros/models/usuario.dart';
@@ -14,14 +16,15 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+
+  final _streamController = StreamController<bool>();
+
   final TextEditingController _tLogin = TextEditingController();
   final TextEditingController _tPassword = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
 
   final _focusPassword = FocusNode();
-
-  bool _showProgress = false;
 
   @override
   void initState() {
@@ -78,10 +81,15 @@ class _LoginPageState extends State<LoginPage> {
             SizedBox(
               height: 20,
             ),
-            AppButton(
-              "Login",
-              onPressed: _onClickLogin,
-              showProgress: _showProgress,
+            StreamBuilder<bool>(
+              stream: _streamController.stream,
+              builder: (context, snapshot) {
+                return AppButton(
+                  "Login",
+                  onPressed: _onClickLogin,
+                  showProgress: snapshot.data ?? false,
+                );
+              }
             ),
           ],
         ),
@@ -96,9 +104,8 @@ class _LoginPageState extends State<LoginPage> {
     String login = _tLogin.text;
     String password = _tPassword.text;
 
-    setState(() {
-      _showProgress = true;
-    });
+    _streamController.add(true);
+    _streamController.add(true);
 
     ResponseApi response = await LoginApi.login(login, password);
 
@@ -109,9 +116,7 @@ class _LoginPageState extends State<LoginPage> {
       alert(context, response.msg);
     }
 
-    setState(() {
-      _showProgress = false;
-    });
+    _streamController.add(false);
   }
 
   String _validateLogin(String text) {
@@ -128,5 +133,12 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     return null;
+  }
+
+  @override
+  void dispose(){
+    super.dispose();
+
+    _streamController.close();
   }
 }
