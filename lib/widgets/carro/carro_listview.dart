@@ -1,12 +1,13 @@
 import 'dart:async';
 
 import 'package:carros/api/carro_api.dart';
+import 'package:carros/bloc/carros_model.dart';
 import 'package:carros/models/carro.dart';
 import 'package:carros/pages/carro_page.dart';
-import 'package:carros/bloc/carros_bloc.dart';
 import 'package:carros/utils/nav.dart';
 import 'package:carros/widgets/text_terror.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 
 class CarrosListView extends StatefulWidget {
   @override
@@ -20,7 +21,7 @@ class CarrosListView extends StatefulWidget {
 class _CarrosListViewState extends State<CarrosListView>
     with AutomaticKeepAliveClientMixin<CarrosListView> {
   List<Carro> carros;
-  final _bloc = CarrosBloc();
+  final _model = CarrosModel();
 
   @override
   // TODO: implement wantKeepAlive
@@ -30,28 +31,27 @@ class _CarrosListViewState extends State<CarrosListView>
   void initState() {
     super.initState();
 
-    _bloc.fetch(widget.tipo);
+    _fetch();
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
 
-    return StreamBuilder(
-      stream: _bloc.stream,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
+    return Observer(
+      builder: (_) {
+        List<Carro> carros = _model.carros;
+        if (_model.error != null) {
           return TextError(
-            msg: "Falha ao carregar carros",
+            msg: "Falha ao carregar carros \n \n Clique aqui para tentar novamente",onPressed: _fetch,
           );
         }
 
-        if (!snapshot.hasData) {
+        if (carros == null) {
           return Center(
             child: CircularProgressIndicator(),
           );
         }
-        List<Carro> carros = snapshot.data;
         return _listView(carros);
       },
     );
@@ -116,10 +116,7 @@ class _CarrosListViewState extends State<CarrosListView>
     push(context, CarroPage(carro));
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-
-    _bloc.dispose();
+  void _fetch() {
+    _model.fetch(widget.tipo);
   }
 }
