@@ -16,6 +16,7 @@ class CarroApi {
 
   static Future<List<Carro>> getOnServer(url) async {
 
+    print("GET -> $url");
     Usuario usuario = await Usuario.get();
     Map<String, String> headers = {
       "Content-Type" : "application/json",
