@@ -26,23 +26,6 @@ class _LoginPageState extends State<LoginPage> {
   final _bloc = LoginBloc();
 
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-
-    Future<Usuario> future = Usuario.get();
-
-    future.then((Usuario usuario) {
-      if (usuario != null) {
-        setState(() {
-          push(context, HomePage(), replace: true);
-          //_tLogin.text = usuario.login;
-        });
-      }
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(centerTitle: true, title: Text("Carros")),

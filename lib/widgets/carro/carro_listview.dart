@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carros/models/carro.dart';
 import 'package:carros/pages/carro_page.dart';
 import 'package:carros/utils/nav.dart';
@@ -25,8 +26,8 @@ class CarrosListView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Center(
-                      child: Image.network(
-                        carro.urlFoto ??
+                      child: CachedNetworkImage(
+                        imageUrl: carro.urlFoto ??
                             "https://www.generationsforpeace.org/wp-content/uploads/2018/03/empty.jpg",
                         width: 250,
                       ),
